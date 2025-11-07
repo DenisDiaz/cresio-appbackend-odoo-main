@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Registro de Usuario</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .response.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .response.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .response pre {
+            margin: 10px 0 0 0;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Test Registro de Usuario</h1>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="name">Nombre Completo:</label>
+                <input type="text" id="name" name="name" required placeholder="Juan Pérez">
+            </div>
+            
+            <div class="form-group">
+                <label for="passport_number">Cédula/Pasaporte:</label>
+                <input type="text" id="passport_number" name="passport_number" required placeholder="1234567890">
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required placeholder="juan@example.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Contraseña (6-15 caracteres):</label>
+                <input type="password" id="password" name="password" required placeholder="mínimo 6 caracteres">
+            </div>
+            
+            <button type="submit" id="submitBtn">Registrar Usuario</button>
+        </form>
+        
+        <div id="response" class="response"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('registerForm');
+        const responseDiv = document.getElementById('response');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Deshabilitar botón
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registrando...';
+            
+            // Limpiar respuesta anterior
+            responseDiv.style.display = 'none';
+            responseDiv.className = 'response';
+            
+            // Obtener datos del formulario
+            const formData = {
+                name: document.getElementById('name').value,
+                passport_number: document.getElementById('passport_number').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            };
+            
+            try {
+                const response = await fetch('http://localhost:8070/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                // Mostrar respuesta
+                responseDiv.style.display = 'block';
+                
+                if (response.status === 200 && data.success) {
+                    responseDiv.className = 'response success';
+                    responseDiv.innerHTML = `
+                        <strong>✅ ¡Registro Exitoso!</strong>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                    form.reset();
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.innerHTML = `
+                        <strong>❌ Error (${response.status})</strong>
+                        <p>${data.error || 'Error desconocido'}</p>
+                        <p>${data.message || ''}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = `
+                    <strong>❌ Error de Conexión</strong>
+                    <p>${error.message}</p>
+                    <p>Asegúrate de que Odoo esté corriendo en http://localhost:8070</p>
+                `;
+            } finally {
+                // Rehabilitar botón
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Registrar Usuario';
+            }
+        });
+    </script>
+</body>
+</html>

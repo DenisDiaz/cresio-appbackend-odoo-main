@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Email Template: Bienvenida -->
+        <record id="email_template_welcome" model="mail.template">
+            <field name="name">Bienvenida - Nuevo Usuario</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="subject">¡Bienvenido a {{ object.company_id.name }}!</field>
+            <field name="email_from">{{ (object.company_id.email or user.email) }}</field>
+            <field name="email_to">{{ object.email }}</field>
+            <field name="body_html" type="html">
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f5f5f5;">
+                    <div style="background-color: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <!-- Header -->
+                        <div style="text-align: center; margin-bottom: 30px;">
+                            <h1 style="color: #714B67; margin: 0;">¡Bienvenido!</h1>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div style="color: #333; line-height: 1.6;">
+                            <p>Hola <strong>{{ object.name }}</strong>,</p>
+                            
+                            <p>¡Gracias por registrarte en nuestra plataforma!</p>
+                            
+                            <p>Tu cuenta ha sido creada exitosamente con los siguientes datos:</p>
+                            
+                            <div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                                <p style="margin: 5px 0;"><strong>Nombre:</strong> {{ object.name }}</p>
+                                <p style="margin: 5px 0;"><strong>Email:</strong> {{ object.email }}</p>
+                                <p style="margin: 5px 0;"><strong>Usuario:</strong> {{ object.login }}</p>
+                            </div>
+                            
+                            <p>Ya puedes acceder a tu cuenta y comenzar a disfrutar de todos nuestros servicios.</p>
+                            
+                            <div style="text-align: center; margin: 30px 0;">
+                                <a href="{{ object.company_id.website or '#' }}" 
+                                   style="background-color: #714B67; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                                    Ir a la plataforma
+                                </a>
+                            </div>
+                            
+                            <p>Si tienes alguna pregunta o necesitas ayuda, no dudes en contactarnos.</p>
+                            
+                            <p style="margin-top: 30px;">
+                                Saludos,<br/>
+                                <strong>El equipo de {{ object.company_id.name }}</strong>
+                            </p>
+                        </div>
+                        
+                        <!-- Footer -->
+                        <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; text-align: center; color: #999; font-size: 12px;">
+                            <p>Este es un correo automático, por favor no respondas a este mensaje.</p>
+                            <p>© {{ datetime.datetime.now().year }} {{ object.company_id.name }}. Todos los derechos reservados.</p>
+                        </div>
+                    </div>
+                </div>
+            </field>
+        </record>
+    </data>
+</odoo>
