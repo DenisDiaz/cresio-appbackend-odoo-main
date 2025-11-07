@@ -1,0 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Odoo
+*.pyc
+*.pyo
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Docker volumes
+odoo-web-data/
+odoo-db-data/
+
+# Enterprise (no subir el código de Enterprise por licencia)
+enterprise/
+enterprise.zip
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.sublime-*
+
+# Environment
+.env
+*.env
+
+# Test files temporales
+test_*.json

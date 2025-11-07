@@ -5,7 +5,7 @@ from odoo.addons.zub_utils.tools.http import make_json_response
 
 class CommonController(http.Controller):
 
-    @http.route('/api/v1/branch-offices/get-all', methods=['GET'], protected=False, type='json', auth='public')
+    @http.route('/api/v1/branch-offices/get-all', type='json', auth='public', csrf=False)
     def pp_get_onboarding(self, **kw):
         model = request.env['res.partner'].sudo()
         try:

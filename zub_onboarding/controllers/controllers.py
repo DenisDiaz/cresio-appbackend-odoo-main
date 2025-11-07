@@ -27,11 +27,11 @@ from odoo.addons.zub_utils.tools.http import make_json_response
 
 class CommonController(http.Controller):
 
-    @http.route('/api/v1/on-boarding/get-by-id', methods=['GET'], protected=False, type='json', auth='public')
+    @http.route('/api/v1/on-boarding/get-by-id', type='json', auth='public', csrf=False)
     def pp_get_onboarding(self, **kw):
         model = request.env['zub.onboarding'].sudo()
         try:
-            data, status = model.get_onboarding(request.httprequest.json)
+            data, status = model.get_onboarding(kw)
         except Exception as e:
             data, status = {"message": str(e)}, 403
         return make_json_response(data, status=status)

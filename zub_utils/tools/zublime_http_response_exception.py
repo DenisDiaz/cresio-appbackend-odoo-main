@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import werkzeug.exceptions
-from odoo.addons.zublime_utils.tools.zublime_http_response import HttpResponseApi
+from odoo.addons.zub_utils.tools.zublime_http_response import HttpResponseApi
 
 
 class HttpResponseExceptionApi:

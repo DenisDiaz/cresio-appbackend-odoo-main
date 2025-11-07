@@ -1,0 +1,44 @@
+# Dockerfile para Odoo 18 Enterprise
+FROM odoo:18.0
+
+USER root
+
+# Instalar dependencias adicionales si son necesarias
+RUN apt-get update && apt-get install -y \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copiar los módulos Enterprise
+COPY ./enterprise/enterprise /mnt/enterprise
+
+# Copiar los módulos personalizados
+COPY ./zub_utils /mnt/extra-addons/zub_utils
+COPY ./zub_supplier_connector /mnt/extra-addons/zub_supplier_connector
+COPY ./zub_onboarding /mnt/extra-addons/zub_onboarding
+COPY ./zub_loyalty /mnt/extra-addons/zub_loyalty
+
+# Configurar permisos
+RUN chown -R odoo:odoo /mnt/enterprise /mnt/extra-addons
+
+# Configurar el addons_path para incluir Enterprise
+RUN echo "[options]" > /etc/odoo/odoo.conf && \
+    echo "addons_path = /usr/lib/python3/dist-packages/odoo/addons,/mnt/enterprise,/mnt/extra-addons" >> /etc/odoo/odoo.conf && \
+    echo "admin_passwd = admin" >> /etc/odoo/odoo.conf && \
+    echo "db_host = db" >> /etc/odoo/odoo.conf && \
+    echo "db_port = 5432" >> /etc/odoo/odoo.conf && \
+    echo "db_user = odoo" >> /etc/odoo/odoo.conf && \
+    echo "db_password = odoo" >> /etc/odoo/odoo.conf && \
+    echo "http_port = 8069" >> /etc/odoo/odoo.conf && \
+    echo "logfile = /var/log/odoo/odoo.log" >> /etc/odoo/odoo.conf && \
+    echo "log_level = info" >> /etc/odoo/odoo.conf
+
+# Crear directorio de logs
+RUN mkdir -p /var/log/odoo && chown -R odoo:odoo /var/log/odoo
+
+USER odoo
+
+# Exponer puerto
+EXPOSE 8069
+
+# Comando por defecto
+CMD ["odoo", "--config=/etc/odoo/odoo.conf"]

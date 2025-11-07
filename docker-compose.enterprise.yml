@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: odoo_postgres_enterprise
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    volumes:
+      - odoo-db-enterprise:/var/lib/postgresql/data/pgdata
+    ports:
+      - "5433:5432"  # Puerto diferente para no conflictuar con la versión Community
+    restart: unless-stopped
+    networks:
+      - odoo-network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.enterprise
+    container_name: odoo_zublime_enterprise
+    depends_on:
+      - db
+    ports:
+      - "8070:8069"  # Puerto diferente para no conflictuar con la versión Community
+    volumes:
+      - odoo-web-enterprise:/var/lib/odoo
+      - ./enterprise/enterprise:/mnt/enterprise:ro
+      - ./zub_utils:/mnt/extra-addons/zub_utils:ro
+      - ./zub_supplier_connector:/mnt/extra-addons/zub_supplier_connector:ro
+      - ./zub_onboarding:/mnt/extra-addons/zub_onboarding:ro
+      - ./zub_loyalty:/mnt/extra-addons/zub_loyalty:ro
+      - odoo-logs:/var/log/odoo
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+      - POSTGRES_DB=postgres
+    restart: unless-stopped
+    networks:
+      - odoo-network
+    command: ["odoo", "--config=/etc/odoo/odoo.conf", "--dev=all"]
+
+volumes:
+  odoo-web-enterprise:
+    name: odoo-web-enterprise
+  odoo-db-enterprise:
+    name: odoo-db-enterprise
+  odoo-logs:
+    name: odoo-logs-enterprise
+
+networks:
+  odoo-network:
+    driver: bridge
