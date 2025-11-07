@@ -1,10 +1,60 @@
-# 🧪 Scripts de Prueba
+# 🧪 Tests - Cresio Backend
 
-Scripts para probar la funcionalidad de Odoo y los módulos personalizados.
+Scripts de prueba para verificar la funcionalidad de Odoo Enterprise y los módulos personalizados.
 
-## 📋 Scripts Disponibles
+## 📋 Tests Disponibles
 
-### Pruebas de Enterprise
+### 🎯 Tests del Endpoint de Registro (Principales)
+
+#### `test_register_simple.py` ⭐
+Test básico del endpoint de registro de usuarios.
+
+```bash
+python tests/test_register_simple.py
+```
+
+**Prueba:**
+- Registro de un usuario nuevo
+- Autologin automático
+- Generación de session_id
+
+#### `test_register_complete.py` ⭐
+Suite completa de tests con todas las validaciones.
+
+```bash
+python tests/test_register_complete.py
+```
+
+**Prueba (6 casos):**
+- ✅ Datos incompletos (400)
+- ✅ Contraseña muy corta (417)
+- ✅ Email inválido (417)
+- ✅ Registro exitoso (200)
+- ✅ Email duplicado (417)
+- ✅ Pasaporte duplicado (417)
+
+#### `test_register.html` ⭐
+Test manual interactivo en el navegador.
+
+```bash
+# Abrir en el navegador
+start tests/test_register.html
+```
+
+**Características:**
+- Formulario visual
+- Validación en tiempo real
+- Respuestas formateadas
+
+#### `test_register.http` ⭐
+Tests para REST Client (VS Code extension).
+
+```bash
+# Usar con la extensión REST Client de VS Code
+# Abrir el archivo y hacer clic en "Send Request"
+```
+
+### 🔧 Tests de Infraestructura
 
 #### `test_endpoints_enterprise.py`
 Prueba completa de todos los endpoints HTTP en Odoo Enterprise.
@@ -13,24 +63,15 @@ Prueba completa de todos los endpoints HTTP en Odoo Enterprise.
 python tests/test_endpoints_enterprise.py
 ```
 
-**Prueba:**
-- Autenticación
-- Módulos instalados
+**Verifica:**
+- Autenticación XML-RPC
+- Módulos instalados (zub_*)
 - Endpoint `/api/v1/branch-offices/get-all`
 - Endpoint `/api/v1/on-boarding/get-by-id`
-- Creación de contactos de prueba
-
-#### `test_enterprise.py`
-Verificación rápida de que Odoo Enterprise está funcionando.
-
-```bash
-python tests/test_enterprise.py
-```
-
-### Pruebas de API
+- Endpoint `/api/v1/auth/register`
 
 #### `test_xmlrpc_api.py`
-Prueba completa de la API XML-RPC con creación de sucursales.
+Prueba completa de la API XML-RPC.
 
 ```bash
 python tests/test_xmlrpc_api.py
@@ -42,135 +83,76 @@ python tests/test_xmlrpc_api.py
 - Búsqueda y filtrado
 - Formato de respuesta JSON
 
-#### `test_api_endpoint.py`
-Prueba específica de endpoints API.
-
-```bash
-python tests/test_api_endpoint.py
-```
-
-### Pruebas de Módulos
-
-#### `test_supplier_connector.py`
-Prueba del módulo `zub_supplier_connector`.
-
-```bash
-python tests/test_supplier_connector.py
-```
-
-**Verifica:**
-- Campo "Conexión Externa"
-- Creación de contactos
-- Endpoint de sucursales
-
-#### `test_field_visibility.py`
-Verifica que el campo "Conexión Externa" esté disponible.
-
-```bash
-python tests/test_field_visibility.py
-```
-
-#### `test_complete.py`
-Suite completa de pruebas de todos los componentes.
-
-```bash
-python tests/test_complete.py
-```
-
-### Utilidades
-
 #### `check_modules_status.py`
-Verifica el estado de instalación de los módulos.
+Verifica el estado de instalación de los módulos personalizados.
 
 ```bash
 python tests/check_modules_status.py
 ```
 
 **Muestra:**
-- zub_utils: installed/uninstalled
-- zub_supplier_connector: installed/uninstalled
-- zub_onboarding: installed/uninstalled
-- zub_loyalty: installed/uninstalled
-
-#### `check_routes.py`
-Verifica qué rutas HTTP están disponibles.
-
-```bash
-python tests/check_routes.py
-```
-
-**Prueba:**
-- `/api/v1/branch-offices/get-all`
-- `/api/v1/on-boarding/get-by-id`
-- `/web/database/list`
-
-#### `demo_rapido.py`
-Demo rápida de funcionalidad básica.
-
-```bash
-python tests/demo_rapido.py
-```
-
-#### `create_test_contacts.py`
-Crea contactos de prueba con conexión externa.
-
-```bash
-python tests/create_test_contacts.py
-```
+- ✅ zub_utils: installed/uninstalled
+- ✅ zub_supplier_connector: installed/uninstalled
+- ✅ zub_onboarding: installed/uninstalled
+- ✅ zub_loyalty: installed/uninstalled
 
 ## 🚀 Uso Rápido
 
-### Verificar que todo funciona
+### Verificar Endpoint de Registro
+
+```bash
+# Test rápido
+python tests/test_register_simple.py
+
+# Test completo con todas las validaciones
+python tests/test_register_complete.py
+```
+
+### Verificar Infraestructura
 
 ```bash
 # 1. Verificar módulos instalados
 python tests/check_modules_status.py
 
-# 2. Probar endpoints
+# 2. Probar todos los endpoints
 python tests/test_endpoints_enterprise.py
 
-# 3. Demo rápida
-python tests/demo_rapido.py
-```
-
-### Probar API completa
-
-```bash
-# API XML-RPC con datos reales
+# 3. Probar API XML-RPC
 python tests/test_xmlrpc_api.py
-```
-
-### Suite completa
-
-```bash
-# Todas las pruebas
-python tests/test_complete.py
 ```
 
 ## 📊 Resultados Esperados
 
-Todos los scripts deberían mostrar:
-- ✅ Autenticación exitosa
-- ✅ Módulos instalados
-- ✅ Endpoints respondiendo 200 OK
-- ✅ Datos retornados correctamente
+### Test de Registro Exitoso
+```json
+{
+  "session_id": "abc123xyz..."
+}
+```
+
+### Test Completo
+```
+✅ PASS - Datos incompletos (400)
+✅ PASS - Contraseña muy corta (417)
+✅ PASS - Email inválido (417)
+✅ PASS - Registro exitoso (200)
+✅ PASS - Email duplicado (417)
+✅ PASS - Pasaporte duplicado (417)
+```
 
 ## ⚙️ Configuración
 
 Los scripts usan por defecto:
 
 ```python
-url = "http://localhost:8070"  # Enterprise
+# Odoo Enterprise
+url = "http://localhost:8070"
 db = "odoo_enterprise"
 username = "admin"
 password = "admin"
 ```
 
-Para Odoo Community, cambia:
-```python
-url = "http://localhost:8069"
-db = "odoo"
-```
+Para cambiar la configuración, edita las variables al inicio de cada script.
 
 ## 🐛 Solución de Problemas
 
@@ -178,28 +160,83 @@ db = "odoo"
 ```bash
 # Verificar que Odoo esté corriendo
 docker ps | grep odoo
+
+# Ver logs
+docker logs odoo_zublime_enterprise
 ```
 
 ### Error de autenticación
-```bash
-# Verificar credenciales
-# Usuario: admin
-# Contraseña: admin
-# Base de datos: odoo_enterprise
-```
+Verifica las credenciales:
+- Usuario: `admin`
+- Contraseña: `admin`
+- Base de datos: `odoo_enterprise`
 
 ### Módulos no encontrados
 ```bash
 # Instalar módulos desde la interfaz web
+# http://localhost:8070
 # Apps > Buscar "zub" > Instalar
 ```
 
-## 📝 Notas
+### Tests fallan
+```bash
+# Reiniciar Odoo
+docker-compose -f docker-compose.enterprise.yml restart
 
-- Los scripts crean datos de prueba que pueden ser eliminados
-- Algunos scripts preguntan si deseas limpiar los datos al final
-- Los scripts son seguros y no afectan datos de producción
+# Esperar 30 segundos y volver a probar
+```
+
+## 📝 Estructura de Tests
+
+```
+tests/
+├── README.md                      # Este archivo
+│
+├── Endpoint de Registro (Principal)
+│   ├── test_register_simple.py    # Test básico
+│   ├── test_register_complete.py  # Test completo
+│   ├── test_register.html         # Test manual
+│   └── test_register.http         # REST Client
+│
+└── Infraestructura
+    ├── test_endpoints_enterprise.py  # Todos los endpoints
+    ├── test_xmlrpc_api.py           # API XML-RPC
+    └── check_modules_status.py      # Estado de módulos
+```
+
+## 🎯 Casos de Uso
+
+### Desarrollo
+```bash
+# Después de hacer cambios en el endpoint
+python tests/test_register_complete.py
+```
+
+### CI/CD
+```bash
+# En pipeline de integración continua
+python tests/test_register_complete.py
+python tests/test_endpoints_enterprise.py
+```
+
+### Debug
+```bash
+# Test manual con interfaz visual
+start tests/test_register.html
+```
+
+### Documentación
+```bash
+# Usar test_register.http como ejemplos
+# para documentación de API
+```
+
+## 📚 Documentación Relacionada
+
+- **ENDPOINT_REGISTRO.md** - Documentación técnica completa del endpoint
+- **RESUMEN_IMPLEMENTACION.md** - Resumen ejecutivo de la implementación
+- **ENTERPRISE_SETUP.md** - Guía de configuración de Odoo Enterprise
 
 ---
 
-**Ejecuta los scripts para verificar que todo funciona correctamente** ✅
+**Ejecuta los tests para verificar que todo funciona correctamente** ✅
