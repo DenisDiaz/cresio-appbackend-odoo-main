@@ -38,3 +38,5 @@ enterprise.zip
 
 # Test files temporales
 test_*.json
+tests/*.json
+tests/__pycache__/
