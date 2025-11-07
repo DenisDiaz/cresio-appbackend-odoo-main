@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+zub_onboarding.access_zub_onboarding,access_zub_onboarding,zub_onboarding.model_zub_onboarding,base.group_user,1,1,1,1
+zub_onboarding.access_zub_onboarding_line,access_zub_onboarding_line,zub_onboarding.model_zub_onboarding_line,base.group_user,1,1,1,1

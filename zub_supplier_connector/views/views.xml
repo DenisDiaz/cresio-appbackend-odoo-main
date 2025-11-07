@@ -1,0 +1,14 @@
+<odoo>
+  <data>
+      <record id="zub_supplier_connector_res_partner_form" model="ir.ui.view">
+        <field name="name">zub_supplier_connector_res_partner_form</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <field name="phone" position="before">
+                <field name="is_supplier_with_external_connection"/>
+            </field>
+        </field>
+      </record>
+  </data>
+</odoo>

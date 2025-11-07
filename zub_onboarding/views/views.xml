@@ -1,0 +1,94 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+
+    <record model="ir.ui.view" id="zub_onboarding.list">
+      <field name="name">zub_onboarding.list</field>
+      <field name="model">zub.onboarding</field>
+      <field name="arch" type="xml">
+        <list>
+            <field name="id"/>
+          <field name="name"/>
+          <field name="active"/>
+        </list>
+      </field>
+    </record>
+
+      <record model="ir.ui.view" id="zub_onboarding.form">
+      <field name="name">zub_onboarding.form</field>
+      <field name="model">zub.onboarding</field>
+      <field name="arch" type="xml">
+        <form>
+            <sheet string="OnBoarding">
+                <widget name="web_ribbon" text="Archivado" bg_color="text-bg-danger" invisible="active"/>
+                <div class="oe_title">
+                    <h1>
+                        <field name="name" required="1" placeholder="Nombre del onboarding..."/>
+                    </h1>
+                </div>
+                <group>
+                    <field name="id"/>
+                    <field name="active"/>
+                </group>
+
+                <notebook>
+                    <page string="Carroucel" name="lines_page">
+                        <field name="lines">
+                            <list edit="true" delete="true" create="true" editable="bottom" multi_edit="true" open_form_view="false">
+                                <field name="sequence" widget="handle"/>
+                                <field name="image" widget="image" class="onboarding_image"/>
+                                <field name="name"/>
+                                <field name="active"/>
+                            </list>
+                        </field>
+                    </page>
+                </notebook>
+            </sheet>
+
+        </form>
+      </field>
+    </record>
+
+    <!-- actions opening views on models -->
+
+    <record model="ir.actions.act_window" id="zub_onboarding.action_window">
+      <field name="name">zub_onboarding window</field>
+      <field name="res_model">zub.onboarding</field>
+      <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- server action to the one above -->
+<!--
+    <record model="ir.actions.server" id="zub_onboarding.action_server">
+      <field name="name">zub_onboarding server</field>
+      <field name="model_id" ref="model_zub_onboarding_zub_onboarding"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "list,form",
+          "res_model": model._name,
+        }
+      </field>
+    </record>
+-->
+
+    <!-- Top menu item -->
+
+    <menuitem name="zub_onboarding" id="zub_onboarding.menu_root"/>
+
+    <!-- menu categories -->
+<!--
+    <menuitem name="Menu 1" id="zub_onboarding.menu_1" parent="zub_onboarding.menu_root"/>
+    <menuitem name="Menu 2" id="zub_onboarding.menu_2" parent="zub_onboarding.menu_root"/>
+-->
+    <!-- actions -->
+
+    <menuitem name="Listado de OnBoarding" id="zub_onboarding.onboarding_list" parent="zub_onboarding.menu_root"
+              action="zub_onboarding.action_window"/>
+<!--
+    <menuitem name="Server to list" id="zub_onboarding" parent="zub_onboarding.menu_2"
+              action="zub_onboarding.action_server"/>
+-->
+  </data>
+</odoo>
