@@ -1,0 +1,76 @@
+### Test 1: Listado sin coordenadas
+POST http://localhost:8070/api/v1/pharmacy/list
+Content-Type: application/json
+
+{}
+
+### Test 2: Listado con coordenadas (ordenado por distancia)
+POST http://localhost:8070/api/v1/pharmacy/list
+Content-Type: application/json
+
+{
+  "latitude": 4.6097,
+  "longitude": -74.0817
+}
+
+### Test 3: Listado con paginación - Página 1, Límite 5
+POST http://localhost:8070/api/v1/pharmacy/list
+Content-Type: application/json
+
+{
+  "latitude": 4.6097,
+  "longitude": -74.0817,
+  "page": 1,
+  "limit": 5
+}
+
+### Test 4: Listado - Página 2
+POST http://localhost:8070/api/v1/pharmacy/list
+Content-Type: application/json
+
+{
+  "page": 2,
+  "limit": 5
+}
+
+### Test 5: Listado con límite grande
+POST http://localhost:8070/api/v1/pharmacy/list
+Content-Type: application/json
+
+{
+  "limit": 20
+}
+
+### Test 6: Latitud inválida (debe fallar con 400)
+POST http://localhost:8070/api/v1/pharmacy/list
+Content-Type: application/json
+
+{
+  "latitude": "invalid",
+  "longitude": -74.0817
+}
+
+### Test 7: Longitud inválida (debe fallar con 400)
+POST http://localhost:8070/api/v1/pharmacy/list
+Content-Type: application/json
+
+{
+  "latitude": 4.6097,
+  "longitude": "invalid"
+}
+
+### Test 8: Página inválida (debe fallar con 400)
+POST http://localhost:8070/api/v1/pharmacy/list
+Content-Type: application/json
+
+{
+  "page": "abc"
+}
+
+### Test 9: Límite inválido (debe fallar con 400)
+POST http://localhost:8070/api/v1/pharmacy/list
+Content-Type: application/json
+
+{
+  "limit": "xyz"
+}

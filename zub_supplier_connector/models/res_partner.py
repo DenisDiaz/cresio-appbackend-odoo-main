@@ -34,6 +34,124 @@ class ResPartner(models.Model):
             return {}, 404
         return {"data": result}, 200
     
+    def get_pharmacies_list(self, user_latitude=None, user_longitude=None, page=1, limit=10):
+        """
+        Obtiene el listado de farmacias con paginación y cálculo de distancia
+        
+        Args:
+            user_latitude: Latitud del usuario (opcional)
+            user_longitude: Longitud del usuario (opcional)
+            page: Número de página (default: 1)
+            limit: Cantidad de resultados por página (default: 10)
+            
+        Returns:
+            dict: Listado de farmacias con paginación
+            int: Status code HTTP
+        """
+        import math
+        
+        # Buscar todas las farmacias con conexión externa
+        domain = [('is_supplier_with_external_connection', '=', True)]
+        
+        # Contar total de registros
+        total_count = self.search_count(domain)
+        
+        if total_count == 0:
+            return {
+                "data": [],
+                "pagination": {
+                    "page": page,
+                    "limit": limit,
+                    "total": 0,
+                    "pages": 0
+                }
+            }, 200
+        
+        # Calcular offset para paginación
+        offset = (page - 1) * limit
+        
+        # Obtener registros paginados
+        pharmacies = self.search(domain, limit=limit, offset=offset, order='name')
+        
+        # Función para calcular distancia
+        def calculate_distance(lat1, lon1, lat2, lon2):
+            if not all([lat1, lon1, lat2, lon2]):
+                return 0.0
+            
+            R = 6371.0  # Radio de la Tierra en km
+            
+            lat1_rad = math.radians(lat1)
+            lon1_rad = math.radians(lon1)
+            lat2_rad = math.radians(lat2)
+            lon2_rad = math.radians(lon2)
+            
+            dlat = lat2_rad - lat1_rad
+            dlon = lon2_rad - lon1_rad
+            
+            a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+            c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+            
+            return R * c
+        
+        # Construir lista de resultados
+        result = []
+        for pharmacy in pharmacies:
+            # Construir dirección
+            address_parts = []
+            if pharmacy.street:
+                address_parts.append(pharmacy.street)
+            if pharmacy.street2:
+                address_parts.append(pharmacy.street2)
+            if pharmacy.city:
+                address_parts.append(pharmacy.city)
+            if pharmacy.state_id:
+                address_parts.append(pharmacy.state_id.name)
+            if pharmacy.zip:
+                address_parts.append(pharmacy.zip)
+            if pharmacy.country_id:
+                address_parts.append(pharmacy.country_id.name)
+            
+            direccion = ", ".join(address_parts) if address_parts else ""
+            
+            # Calcular distancia
+            distance = 0.0
+            if user_latitude and user_longitude:
+                distance = calculate_distance(
+                    user_latitude, 
+                    user_longitude,
+                    pharmacy.partner_latitude,
+                    pharmacy.partner_longitude
+                )
+            
+            result.append({
+                "id": pharmacy.id,
+                "nombre": pharmacy.name or "",
+                "latitude": pharmacy.partner_latitude or 0.0,
+                "longitude": pharmacy.partner_longitude or 0.0,
+                "direccion": direccion,
+                "distancia": round(distance, 2)
+            })
+        
+        # Si se proporcionaron coordenadas, ordenar por distancia
+        if user_latitude and user_longitude:
+            result.sort(key=lambda x: x['distancia'])
+        
+        # Calcular total de páginas
+        total_pages = math.ceil(total_count / limit)
+        
+        # Construir respuesta con paginación
+        response = {
+            "data": result,
+            "pagination": {
+                "page": page,
+                "limit": limit,
+                "total": total_count,
+                "pages": total_pages
+            }
+        }
+        
+        return response, 200
+    
     def get_pharmacy_detail(self, pharmacy_id, user_latitude, user_longitude):
         """
         Obtiene el detalle de una farmacia específica con cálculo de distancia

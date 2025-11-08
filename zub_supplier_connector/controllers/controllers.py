@@ -26,6 +26,96 @@ class CommonController(http.Controller):
             data, status = {"message": str(e)}, 403
         return make_json_response(data, status=status)
     
+    @http.route('/api/v1/pharmacy/list', type='http', auth='public', csrf=False, methods=['POST'])
+    def get_pharmacies_list(self, **params):
+        """
+        Endpoint para obtener el listado de farmacias con paginación
+        
+        Request JSON:
+        {
+            "latitude": 4.6097,
+            "longitude": -74.0817,
+            "page": 1,
+            "limit": 10
+        }
+        
+        Response Codes:
+        200 - Success: Listado obtenido correctamente
+        400 - Bad Request: Datos de entrada inválidos
+        500 - Server Error: Error interno del servidor
+        """
+        try:
+            # Parsear JSON del request
+            data = json.loads(request.httprequest.data.decode('utf-8'))
+            
+            # Obtener parámetros
+            latitude = data.get('latitude')
+            longitude = data.get('longitude')
+            page = data.get('page', 1)
+            limit = data.get('limit', 10)
+            
+            _logger.info(f"Pharmacy list request - Lat: {latitude}, Lon: {longitude}, Page: {page}, Limit: {limit}")
+            
+            # Validar coordenadas (opcionales pero deben ser números si se envían)
+            if latitude is not None:
+                try:
+                    latitude = float(latitude)
+                except (ValueError, TypeError):
+                    return make_http_json_response({
+                        "error": "Latitud inválida",
+                        "message": "La latitud debe ser un número"
+                    }, status=400)
+            
+            if longitude is not None:
+                try:
+                    longitude = float(longitude)
+                except (ValueError, TypeError):
+                    return make_http_json_response({
+                        "error": "Longitud inválida",
+                        "message": "La longitud debe ser un número"
+                    }, status=400)
+            
+            # Validar paginación
+            try:
+                page = int(page)
+                if page < 1:
+                    page = 1
+            except (ValueError, TypeError):
+                return make_http_json_response({
+                    "error": "Página inválida",
+                    "message": "El número de página debe ser un entero positivo"
+                }, status=400)
+            
+            try:
+                limit = int(limit)
+                if limit < 1:
+                    limit = 10
+                elif limit > 100:  # Límite máximo
+                    limit = 100
+            except (ValueError, TypeError):
+                return make_http_json_response({
+                    "error": "Límite inválido",
+                    "message": "El límite debe ser un entero entre 1 y 100"
+                }, status=400)
+            
+            # Obtener listado de farmacias
+            model = request.env['res.partner'].sudo()
+            result, status = model.get_pharmacies_list(latitude, longitude, page, limit)
+            
+            return make_http_json_response(result, status=status)
+            
+        except json.JSONDecodeError:
+            return make_http_json_response({
+                "error": "JSON inválido",
+                "message": "El cuerpo de la petición debe ser un JSON válido"
+            }, status=400)
+        except Exception as e:
+            _logger.error(f"Error en get_pharmacies_list: {str(e)}")
+            return make_http_json_response({
+                "error": "Error interno del servidor",
+                "message": str(e)
+            }, status=500)
+    
     @http.route('/api/v1/pharmacy/get-detail', type='http', auth='public', csrf=False, methods=['POST'])
     def get_pharmacy_detail(self, **params):
         """
