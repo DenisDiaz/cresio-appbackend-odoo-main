@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Detalle de Farmacia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #714B67;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #5a3a52;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            display: none;
+        }
+        .response.success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .response.error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .response pre {
+            margin: 10px 0 0 0;
+            padding: 10px;
+            background-color: rgba(0,0,0,0.05);
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .pharmacy-detail {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+        .pharmacy-detail h3 {
+            margin-top: 0;
+            color: #714B67;
+        }
+        .detail-item {
+            margin: 8px 0;
+            padding: 8px;
+            background-color: white;
+            border-radius: 4px;
+        }
+        .detail-label {
+            font-weight: bold;
+            color: #555;
+        }
+        .help-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 3px;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            margin-top: 5px;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏥 Test Detalle de Farmacia</h1>
+        
+        <form id="pharmacyForm">
+            <div class="form-group">
+                <label for="pharmacy_id">ID de Farmacia:</label>
+                <input type="number" id="pharmacy_id" name="pharmacy_id" required placeholder="1">
+                <div class="help-text">ID de la farmacia a consultar</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="latitude">Latitud (opcional):</label>
+                <input type="number" step="any" id="latitude" name="latitude" placeholder="4.6097">
+                <div class="help-text">Tu latitud actual para calcular distancia</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="longitude">Longitud (opcional):</label>
+                <input type="number" step="any" id="longitude" name="longitude" placeholder="-74.0817">
+                <div class="help-text">Tu longitud actual para calcular distancia</div>
+            </div>
+            
+            <button type="submit" id="submitBtn">Obtener Detalle</button>
+            <button type="button" class="btn-secondary" onclick="getMyLocation()">📍 Usar Mi Ubicación</button>
+        </form>
+        
+        <div id="response" class="response"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('pharmacyForm');
+        const responseDiv = document.getElementById('response');
+        const submitBtn = document.getElementById('submitBtn');
+        
+        function getMyLocation() {
+            if (navigator.geolocation) {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Obteniendo ubicación...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        document.getElementById('latitude').value = position.coords.latitude;
+                        document.getElementById('longitude').value = position.coords.longitude;
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Obtener Detalle';
+                        alert('✅ Ubicación obtenida correctamente');
+                    },
+                    (error) => {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Obtener Detalle';
+                        alert('❌ Error obteniendo ubicación: ' + error.message);
+                    }
+                );
+            } else {
+                alert('❌ Tu navegador no soporta geolocalización');
+            }
+        }
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Consultando...';
+            
+            responseDiv.style.display = 'none';
+            responseDiv.className = 'response';
+            
+            const formData = {
+                id: parseInt(document.getElementById('pharmacy_id').value)
+            };
+            
+            const lat = document.getElementById('latitude').value;
+            const lon = document.getElementById('longitude').value;
+            
+            if (lat) formData.latitude = parseFloat(lat);
+            if (lon) formData.longitude = parseFloat(lon);
+            
+            try {
+                const response = await fetch('http://localhost:8070/api/v1/pharmacy/get-detail', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                
+                responseDiv.style.display = 'block';
+                
+                if (response.status === 200) {
+                    responseDiv.className = 'response success';
+                    responseDiv.innerHTML = `
+                        <strong>✅ Farmacia Encontrada</strong>
+                        <div class="pharmacy-detail">
+                            <h3>${data.nombre}</h3>
+                            <div class="detail-item">
+                                <span class="detail-label">📍 Dirección:</span> ${data.direccion || 'No disponible'}
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">📞 Teléfono:</span> ${data.telefono || 'No disponible'}
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">🌐 Web:</span> ${data.web ? '<a href="' + data.web + '" target="_blank">' + data.web + '</a>' : 'No disponible'}
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">📧 Email:</span> ${data.email || 'No disponible'}
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">📏 Distancia:</span> ${data.distancia ? data.distancia + ' km' : 'No calculada'}
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">🗺️ Coordenadas:</span> ${data.latitude}, ${data.longitude}
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">🖼️ Imágenes:</span> ${data.imagenes.length} imagen(es)
+                            </div>
+                        </div>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                } else {
+                    responseDiv.className = 'response error';
+                    responseDiv.innerHTML = `
+                        <strong>❌ Error (${response.status})</strong>
+                        <p>${data.error || 'Error desconocido'}</p>
+                        <p>${data.message || ''}</p>
+                        <pre>${JSON.stringify(data, null, 2)}</pre>
+                    `;
+                }
+            } catch (error) {
+                responseDiv.style.display = 'block';
+                responseDiv.className = 'response error';
+                responseDiv.innerHTML = `
+                    <strong>❌ Error de Conexión</strong>
+                    <p>${error.message}</p>
+                    <p>Asegúrate de que Odoo esté corriendo en http://localhost:8070</p>
+                `;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Obtener Detalle';
+            }
+        });
+    </script>
+</body>
+</html>

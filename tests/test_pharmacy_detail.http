@@ -1,0 +1,66 @@
+### Test 1: Obtener detalle de farmacia con coordenadas
+POST http://localhost:8070/api/v1/pharmacy/get-detail
+Content-Type: application/json
+
+{
+  "id": 1,
+  "latitude": 4.6097,
+  "longitude": -74.0817
+}
+
+### Test 2: Obtener detalle sin coordenadas
+POST http://localhost:8070/api/v1/pharmacy/get-detail
+Content-Type: application/json
+
+{
+  "id": 1
+}
+
+### Test 3: Sin ID (debe fallar con 400)
+POST http://localhost:8070/api/v1/pharmacy/get-detail
+Content-Type: application/json
+
+{
+  "latitude": 4.6097,
+  "longitude": -74.0817
+}
+
+### Test 4: ID inválido (debe fallar con 400)
+POST http://localhost:8070/api/v1/pharmacy/get-detail
+Content-Type: application/json
+
+{
+  "id": "abc",
+  "latitude": 4.6097,
+  "longitude": -74.0817
+}
+
+### Test 5: ID que no existe (debe fallar con 404)
+POST http://localhost:8070/api/v1/pharmacy/get-detail
+Content-Type: application/json
+
+{
+  "id": 999999,
+  "latitude": 4.6097,
+  "longitude": -74.0817
+}
+
+### Test 6: Latitud inválida (debe fallar con 400)
+POST http://localhost:8070/api/v1/pharmacy/get-detail
+Content-Type: application/json
+
+{
+  "id": 1,
+  "latitude": "invalid",
+  "longitude": -74.0817
+}
+
+### Test 7: Longitud inválida (debe fallar con 400)
+POST http://localhost:8070/api/v1/pharmacy/get-detail
+Content-Type: application/json
+
+{
+  "id": 1,
+  "latitude": 4.6097,
+  "longitude": "invalid"
+}
