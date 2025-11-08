@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Tester - Odoo Zublime</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .endpoint-section {
+            margin-bottom: 30px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .endpoint-header {
+            background: #f5f5f5;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+        
+        .endpoint-header:hover {
+            background: #ebebeb;
+        }
+        
+        .endpoint-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .endpoint-method {
+            background: #4CAF50;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .endpoint-body {
+            padding: 20px;
+            display: none;
+        }
+        
+        .endpoint-body.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        textarea {
+            min-height: 150px;
+            font-family: 'Courier New', monospace;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-weight: bold;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .response-section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .response-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .response-content {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .status-success {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+        
+        .status-error {
+            color: #f44336;
+            font-weight: bold;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 API Tester</h1>
+            <p>Odoo Zublime Enterprise - Probador de Endpoints</p>
+        </div>
+        
+        <div class="content">
+            <!-- Endpoint 1: Registro de Usuario -->
+            <div class="endpoint-section">
+                <div class="endpoint-header" onclick="toggleEndpoint('register')">
+                    <span class="endpoint-title">📝 Registro de Usuario</span>
+                    <span class="endpoint-method">POST</span>
+                </div>
+                <div class="endpoint-body" id="register">
+                    <form onsubmit="testRegister(event)">
+                        <div class="form-group">
+                            <label>Nombre Completo:</label>
+                            <input type="text" id="reg_name" value="Juan Pérez" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Cédula/Pasaporte:</label>
+                            <input type="text" id="reg_passport" value="1234567890" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input type="email" id="reg_email" value="juan.perez@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Contraseña (6-15 caracteres):</label>
+                            <input type="password" id="reg_password" value="password123" required>
+                        </div>
+                        <button type="submit" class="btn">Enviar Petición</button>
+                        <div id="register_response" class="response-section" style="display:none;">
+                            <div class="response-title">Respuesta:</div>
+                            <div class="response-content" id="register_response_content"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Endpoint 2: Listado de Farmacias -->
+            <div class="endpoint-section">
+                <div class="endpoint-header" onclick="toggleEndpoint('pharmacy_list')">
+                    <span class="endpoint-title">🏥 Listado de Farmacias</span>
+                    <span class="endpoint-method">POST</span>
+                </div>
+                <div class="endpoint-body" id="pharmacy_list">
+                    <form onsubmit="testPharmacyList(event)">
+                        <div class="form-group">
+                            <label>Latitud (opcional):</label>
+                            <input type="number" step="any" id="list_lat" value="4.6097">
+                        </div>
+                        <div class="form-group">
+                            <label>Longitud (opcional):</label>
+                            <input type="number" step="any" id="list_lon" value="-74.0817">
+                        </div>
+                        <div class="form-group">
+                            <label>Página:</label>
+                            <input type="number" id="list_page" value="1" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Límite (1-100):</label>
+                            <input type="number" id="list_limit" value="10" min="1" max="100">
+                        </div>
+                        <button type="submit" class="btn">Enviar Petición</button>
+                        <div id="pharmacy_list_response" class="response-section" style="display:none;">
+                            <div class="response-title">Respuesta:</div>
+                            <div class="response-content" id="pharmacy_list_response_content"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Endpoint 3: Detalle de Farmacia -->
+            <div class="endpoint-section">
+                <div class="endpoint-header" onclick="toggleEndpoint('pharmacy_detail')">
+                    <span class="endpoint-title">🔍 Detalle de Farmacia</span>
+                    <span class="endpoint-method">POST</span>
+                </div>
+                <div class="endpoint-body" id="pharmacy_detail">
+                    <form onsubmit="testPharmacyDetail(event)">
+                        <div class="form-group">
+                            <label>ID de Farmacia:</label>
+                            <input type="number" id="detail_id" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Latitud (opcional):</label>
+                            <input type="number" step="any" id="detail_lat" value="4.6097">
+                        </div>
+                        <div class="form-group">
+                            <label>Longitud (opcional):</label>
+                            <input type="number" step="any" id="detail_lon" value="-74.0817">
+                        </div>
+                        <button type="submit" class="btn">Enviar Petición</button>
+                        <div id="pharmacy_detail_response" class="response-section" style="display:none;">
+                            <div class="response-title">Respuesta:</div>
+                            <div class="response-content" id="pharmacy_detail_response_content"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Endpoint 4: Custom Request -->
+            <div class="endpoint-section">
+                <div class="endpoint-header" onclick="toggleEndpoint('custom')">
+                    <span class="endpoint-title">⚙️ Petición Personalizada</span>
+                    <span class="endpoint-method">POST</span>
+                </div>
+                <div class="endpoint-body" id="custom">
+                    <form onsubmit="testCustom(event)">
+                        <div class="form-group">
+                            <label>URL del Endpoint:</label>
+                            <input type="text" id="custom_url" value="http://localhost:8070/api/v1/" placeholder="/api/v1/...">
+                        </div>
+                        <div class="form-group">
+                            <label>JSON Body:</label>
+                            <textarea id="custom_body" placeholder='{"key": "value"}'>{}</textarea>
+                        </div>
+                        <button type="submit" class="btn">Enviar Petición</button>
+                        <div id="custom_response" class="response-section" style="display:none;">
+                            <div class="response-title">Respuesta:</div>
+                            <div class="response-content" id="custom_response_content"></div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleEndpoint(id) {
+            const element = document.getElementById(id);
+            element.classList.toggle('active');
+        }
+
+        async function makeRequest(url, data, responseId) {
+            const responseDiv = document.getElementById(responseId);
+            const responseContent = document.getElementById(responseId + '_content');
+            
+            responseDiv.style.display = 'block';
+            responseContent.innerHTML = '<div class="loading"></div> Enviando petición...';
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                const statusClass = response.ok ? 'status-success' : 'status-error';
+                
+                responseContent.innerHTML = `<span class="${statusClass}">Status: ${response.status} ${response.statusText}</span>\n\n${JSON.stringify(result, null, 2)}`;
+            } catch (error) {
+                responseContent.innerHTML = `<span class="status-error">Error:</span>\n\n${error.message}`;
+            }
+        }
+
+        function testRegister(event) {
+            event.preventDefault();
+            const data = {
+                name: document.getElementById('reg_name').value,
+                passport_number: document.getElementById('reg_passport').value,
+                email: document.getElementById('reg_email').value,
+                password: document.getElementById('reg_password').value
+            };
+            makeRequest('http://localhost:8070/api/v1/auth/register', data, 'register_response');
+        }
+
+        function testPharmacyList(event) {
+            event.preventDefault();
+            const data = {
+                latitude: parseFloat(document.getElementById('list_lat').value) || null,
+                longitude: parseFloat(document.getElementById('list_lon').value) || null,
+                page: parseInt(document.getElementById('list_page').value),
+                limit: parseInt(document.getElementById('list_limit').value)
+            };
+            makeRequest('http://localhost:8070/api/v1/pharmacy/list', data, 'pharmacy_list_response');
+        }
+
+        function testPharmacyDetail(event) {
+            event.preventDefault();
+            const data = {
+                id: parseInt(document.getElementById('detail_id').value),
+                latitude: parseFloat(document.getElementById('detail_lat').value) || null,
+                longitude: parseFloat(document.getElementById('detail_lon').value) || null
+            };
+            makeRequest('http://localhost:8070/api/v1/pharmacy/get-detail', data, 'pharmacy_detail_response');
+        }
+
+        function testCustom(event) {
+            event.preventDefault();
+            const url = document.getElementById('custom_url').value;
+            let data;
+            try {
+                data = JSON.parse(document.getElementById('custom_body').value);
+            } catch (e) {
+                alert('JSON inválido: ' + e.message);
+                return;
+            }
+            makeRequest(url, data, 'custom_response');
+        }
+
+        // Abrir el primer endpoint por defecto
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleEndpoint('register');
+        });
+    </script>
+</body>
+</html>
