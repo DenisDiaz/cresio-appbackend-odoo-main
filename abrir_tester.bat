@@ -1,0 +1,3 @@
+@echo off
+echo Abriendo API Tester en Chrome (modo desarrollo)...
+"C:\Program Files\Google\Chrome\Application\chrome.exe" --disable-web-security --user-data-dir="C:/temp/chrome_dev" "%~dp0api_tester.html"
