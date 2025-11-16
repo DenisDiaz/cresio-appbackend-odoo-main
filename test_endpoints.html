@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Probador de Endpoints - Odoo API</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .endpoint-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+        
+        .endpoint-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .endpoint-title {
+            color: #667eea;
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .method-badge {
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            font-weight: bold;
+        }
+        
+        .endpoint-url {
+            background: #f5f5f5;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin-bottom: 15px;
+            word-break: break-all;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.6);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .response-container {
+            margin-top: 20px;
+            display: none;
+        }
+        
+        .response-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .status-badge {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        
+        .status-success {
+            background: #4caf50;
+            color: white;
+        }
+        
+        .status-error {
+            background: #f44336;
+            color: white;
+        }
+        
+        .response-box {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        
+        .info-box strong {
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Probador de Endpoints - Odoo API</h1>
+        
+        <div class="info-box">
+            <strong>ℹ️ Información:</strong> Servidor corriendo en <strong>http://localhost:8070</strong>
+        </div>
+
+        <!-- Endpoint 1: Listar Farmacias -->
+        <div class="endpoint-card">
+            <div class="endpoint-title">
+                <span class="method-badge">POST</span>
+                <span>📋 Listar Farmacias</span>
+            </div>
+            <div class="endpoint-url">/api/v1/pharmacy/list</div>
+            
+            <div class="grid-2">
+                <div class="input-group">
+                    <label>Latitud (opcional):</label>
+                    <input type="number" id="list-lat" step="0.0001" placeholder="Ej: 4.6097">
+                </div>
+                <div class="input-group">
+                    <label>Longitud (opcional):</label>
+                    <input type="number" id="list-lng" step="0.0001" placeholder="Ej: -74.0817">
+                </div>
+                <div class="input-group">
+                    <label>Página:</label>
+                    <input type="number" id="list-page" value="1" min="1">
+                </div>
+                <div class="input-group">
+                    <label>Límite:</label>
+                    <input type="number" id="list-limit" value="10" min="1" max="100">
+                </div>
+            </div>
+            
+            <button class="btn" onclick="testPharmacyList()">🔍 Probar Endpoint</button>
+            
+            <div class="loading" id="loading-list">
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="response-container" id="response-list">
+                <div class="response-header">
+                    <strong>Respuesta:</strong>
+                    <span class="status-badge" id="status-list"></span>
+                </div>
+                <div class="response-box" id="response-box-list"></div>
+            </div>
+        </div>
+
+        <!-- Endpoint 2: Detalle de Farmacia -->
+        <div class="endpoint-card">
+            <div class="endpoint-title">
+                <span class="method-badge">POST</span>
+                <span>🏥 Detalle de Farmacia</span>
+            </div>
+            <div class="endpoint-url">/api/v1/pharmacy/get-detail</div>
+            
+            <div class="grid-2">
+                <div class="input-group">
+                    <label>ID de Farmacia (requerido):</label>
+                    <input type="number" id="detail-id" placeholder="Ej: 18" required>
+                </div>
+                <div class="input-group">
+                    <label>Latitud (opcional):</label>
+                    <input type="number" id="detail-lat" step="0.0001" placeholder="Ej: 4.6097">
+                </div>
+                <div class="input-group">
+                    <label>Longitud (opcional):</label>
+                    <input type="number" id="detail-lng" step="0.0001" placeholder="Ej: -74.0817">
+                </div>
+            </div>
+            
+            <button class="btn" onclick="testPharmacyDetail()">🔍 Probar Endpoint</button>
+            
+            <div class="loading" id="loading-detail">
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="response-container" id="response-detail">
+                <div class="response-header">
+                    <strong>Respuesta:</strong>
+                    <span class="status-badge" id="status-detail"></span>
+                </div>
+                <div class="response-box" id="response-box-detail"></div>
+            </div>
+        </div>
+
+        <!-- Endpoint 3: Sucursales -->
+        <div class="endpoint-card">
+            <div class="endpoint-title">
+                <span class="method-badge">POST</span>
+                <span>🏢 Obtener Sucursales</span>
+            </div>
+            <div class="endpoint-url">/api/v1/branch-offices/get-all</div>
+            
+            <button class="btn" onclick="testBranchOffices()">🔍 Probar Endpoint</button>
+            
+            <div class="loading" id="loading-branch">
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="response-container" id="response-branch">
+                <div class="response-header">
+                    <strong>Respuesta:</strong>
+                    <span class="status-badge" id="status-branch"></span>
+                </div>
+                <div class="response-box" id="response-box-branch"></div>
+            </div>
+        </div>
+
+        <!-- Endpoint 4: Onboarding -->
+        <div class="endpoint-card">
+            <div class="endpoint-title">
+                <span class="method-badge">POST</span>
+                <span>👤 Onboarding</span>
+            </div>
+            <div class="endpoint-url">/api/v1/on-boarding/get-by-id</div>
+            
+            <div class="input-group">
+                <label>ID:</label>
+                <input type="number" id="onboarding-id" value="1" min="1">
+            </div>
+            
+            <button class="btn" onclick="testOnboarding()">🔍 Probar Endpoint</button>
+            
+            <div class="loading" id="loading-onboarding">
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="response-container" id="response-onboarding">
+                <div class="response-header">
+                    <strong>Respuesta:</strong>
+                    <span class="status-badge" id="status-onboarding"></span>
+                </div>
+                <div class="response-box" id="response-box-onboarding"></div>
+            </div>
+        </div>
+
+        <!-- Endpoint 5: Registrar Usuario -->
+        <div class="endpoint-card">
+            <div class="endpoint-title">
+                <span class="method-badge">POST</span>
+                <span>✍️ Registrar Usuario</span>
+            </div>
+            <div class="endpoint-url">/api/v1/auth/register</div>
+            
+            <div class="grid-2">
+                <div class="input-group">
+                    <label>Nombre Completo (requerido):</label>
+                    <input type="text" id="register-name" placeholder="Ej: Juan Pérez" required>
+                </div>
+                <div class="input-group">
+                    <label>Email (requerido):</label>
+                    <input type="email" id="register-email" placeholder="Ej: juan@example.com" required>
+                </div>
+                <div class="input-group">
+                    <label>Cédula/Pasaporte (requerido):</label>
+                    <input type="text" id="register-passport" placeholder="Ej: 1234567890" required>
+                </div>
+                <div class="input-group">
+                    <label>Contraseña (6-15 caracteres):</label>
+                    <input type="password" id="register-password" placeholder="Mínimo 6 caracteres" required>
+                </div>
+            </div>
+            
+            <div class="info-box" style="margin-top: 15px;">
+                <strong>⚠️ Nota:</strong> Este endpoint crea un usuario real en el sistema. Usa datos de prueba.
+            </div>
+            
+            <button class="btn" onclick="testRegister()">✍️ Registrar Usuario</button>
+            
+            <div class="loading" id="loading-register">
+                <div class="spinner"></div>
+            </div>
+            
+            <div class="response-container" id="response-register">
+                <div class="response-header">
+                    <strong>Respuesta:</strong>
+                    <span class="status-badge" id="status-register"></span>
+                </div>
+                <div class="response-box" id="response-box-register"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Usar el mismo servidor (proxy) para evitar CORS
+        const BASE_URL = window.location.origin;
+
+        async function makeRequest(endpoint, data, loadingId, responseId, statusId, responseBoxId) {
+            const loading = document.getElementById(loadingId);
+            const response = document.getElementById(responseId);
+            const status = document.getElementById(statusId);
+            const responseBox = document.getElementById(responseBoxId);
+            
+            loading.style.display = 'block';
+            response.style.display = 'none';
+            
+            try {
+                const res = await fetch(`${BASE_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const jsonData = await res.json();
+                
+                loading.style.display = 'none';
+                response.style.display = 'block';
+                
+                if (res.ok) {
+                    status.textContent = `✓ ${res.status} OK`;
+                    status.className = 'status-badge status-success';
+                } else {
+                    status.textContent = `✗ ${res.status} Error`;
+                    status.className = 'status-badge status-error';
+                }
+                
+                responseBox.textContent = JSON.stringify(jsonData, null, 2);
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                response.style.display = 'block';
+                status.textContent = '✗ Error de Conexión';
+                status.className = 'status-badge status-error';
+                responseBox.textContent = `Error: ${error.message}\n\nVerifica que Odoo esté corriendo en ${BASE_URL}`;
+            }
+        }
+
+        function testPharmacyList() {
+            const lat = document.getElementById('list-lat').value;
+            const lng = document.getElementById('list-lng').value;
+            const page = parseInt(document.getElementById('list-page').value);
+            const limit = parseInt(document.getElementById('list-limit').value);
+            
+            const data = {
+                page: page,
+                limit: limit
+            };
+            
+            if (lat && lng) {
+                data.latitude = parseFloat(lat);
+                data.longitude = parseFloat(lng);
+            }
+            
+            makeRequest('/api/v1/pharmacy/list', data, 'loading-list', 'response-list', 'status-list', 'response-box-list');
+        }
+
+        function testPharmacyDetail() {
+            const id = document.getElementById('detail-id').value;
+            const lat = document.getElementById('detail-lat').value;
+            const lng = document.getElementById('detail-lng').value;
+            
+            if (!id) {
+                alert('Por favor ingresa un ID de farmacia');
+                return;
+            }
+            
+            const data = {
+                id: parseInt(id)
+            };
+            
+            if (lat && lng) {
+                data.latitude = parseFloat(lat);
+                data.longitude = parseFloat(lng);
+            }
+            
+            makeRequest('/api/v1/pharmacy/get-detail', data, 'loading-detail', 'response-detail', 'status-detail', 'response-box-detail');
+        }
+
+        function testBranchOffices() {
+            makeRequest('/api/v1/branch-offices/get-all', {}, 'loading-branch', 'response-branch', 'status-branch', 'response-box-branch');
+        }
+
+        function testOnboarding() {
+            const id = parseInt(document.getElementById('onboarding-id').value);
+            makeRequest('/api/v1/on-boarding/get-by-id', { id: id }, 'loading-onboarding', 'response-onboarding', 'status-onboarding', 'response-box-onboarding');
+        }
+
+        function testRegister() {
+            const name = document.getElementById('register-name').value;
+            const email = document.getElementById('register-email').value;
+            const passport = document.getElementById('register-passport').value;
+            const password = document.getElementById('register-password').value;
+            
+            if (!name || !email || !passport || !password) {
+                alert('Por favor completa todos los campos requeridos');
+                return;
+            }
+            
+            if (password.length < 6 || password.length > 15) {
+                alert('La contraseña debe tener entre 6 y 15 caracteres');
+                return;
+            }
+            
+            const data = {
+                name: name,
+                email: email,
+                passport_number: passport,
+                password: password
+            };
+            
+            makeRequest('/api/v1/auth/register', data, 'loading-register', 'response-register', 'status-register', 'response-box-register');
+        }
+
+        // Auto-llenar con coordenadas de Bogotá al hacer click
+        document.getElementById('list-lat').addEventListener('focus', function() {
+            if (!this.value) this.value = '4.6097';
+        });
+        document.getElementById('list-lng').addEventListener('focus', function() {
+            if (!this.value) this.value = '-74.0817';
+        });
+        document.getElementById('detail-lat').addEventListener('focus', function() {
+            if (!this.value) this.value = '4.6097';
+        });
+        document.getElementById('detail-lng').addEventListener('focus', function() {
+            if (!this.value) this.value = '-74.0817';
+        });
+    </script>
+</body>
+</html>
